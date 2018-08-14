@@ -611,11 +611,6 @@ FUNCTION Verify()
     LOCAL nPos := IF( nGridFocus = 1, SplitChild_1.Grid_1.Value, SplitChild_2.Grid_2.Value )
     LOCAL cDirectory := aSubDirectory[nGridFocus][1], i, cPath, cFile, cExt, cExe
 
-    AutoMsgInfo(aSubDirectory[nGridFocus][1])
-    AutoMsgInfo( Alltrim(aDirectory[nGridFocus][ nPos, 1 ] ) )
-
-    AutoMsgInfo( aDirectory[nGridFocus][ nPos, 2 ] )
-
     IF !Empty( nPos )
         IF Len( aDirectory[nGridFocus] ) > 0
             IF Alltrim(aDirectory[nGridFocus][ nPos, 1 ] ) <> '[..]' .AND. Valtype(aDirectory[nGridFocus][ nPos, 2 ]) # "N"
