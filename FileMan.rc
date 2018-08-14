@@ -1,0 +1,22 @@
+MAIN            ICON     main.ico
+
+REREAD          BITMAP   bmps\refresh.bmp
+
+NOTES           BITMAP   bmps\notepad.bmp
+WRITE           BITMAP   bmps\write.bmp
+PAINT           BITMAP   bmps\paint.bmp
+CALC            BITMAP   bmps\calc.bmp
+CPANEL          BITMAP   bmps\cpanel.bmp
+SYSTEM          BITMAP   bmps\system.bmp
+TOOLS           BITMAP   bmps\tools.bmp
+SAVER           BITMAP   bmps\saver.bmp
+
+FLOPPY          BITMAP   bmps\floppy.bmp
+REMOVE          BITMAP   bmps\remove.bmp
+HARD            BITMAP   bmps\hard.bmp
+REMOTE          BITMAP   bmps\remote.bmp
+CDROM           BITMAP   bmps\cdrom.bmp
+RAMDISK         BITMAP   bmps\ramdisk.bmp
+CONSOLA         BITMAP   bmps\cmd.bmp
+PACK            BITMAP   bmps\pack.bmp
+UNPACK          BITMAP   bmps\unpack.bmp
