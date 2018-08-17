@@ -665,112 +665,7 @@ FUNCTION Verify()
 
 RETURN NIL
 
-*-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._
-PROCEDURE Head_click( nColumnNo )
-*-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._
 
-  LOCAL nOrder  := aColOrder[ nColumnNo ],; // 0: Natural, 1: Ascend, 2: Descend
-        aImages := ARRAY(4),;
-        lAscend
-
-  nOrder := IF( nOrder < 2, nOrder + 1, 0 )
-
-  aColOrder[ nColumnNo ] := nOrder
-
-  AEVAL( aImages, { | x, i1 | aImages[ i1 ] := 0 } )
-
-
-
-  IF nOrder = 0
-     ASORT( aDirectory[nGridFocus], , , { | x, y | x[ 6 ] < y[ 6 ] } )
-  ENDIF
-
-  IF nOrder = 1
-     lAscend := nOrder < 2
-     IF nColumnNo # 1
-        IF lAscend
-           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) < UPPER( y[ nColumnNo ] ) } )
-        ELSE
-           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) > UPPER( y[ nColumnNo ] ) } )
-        ENDIF
-     ENDIF
-  ENDIF
-
- // Asort(aDirectory[nGridFocus], , , {|a,b| if(valtype(a[2]) # "N" .AND. valtype(b[2]) # "N", SUBSTR(a[1],2) < SUBSTR(b[1],2), if(valtype(a[2]) # "N", SUBSTR(a[1],2) < CHR(254)+b[1], if(valtype(b[2]) # "N", CHR(254)+a[1] < SUBSTR(b[1],2), a[1] < b[1])))})
-
-
-
-  IF nOrder = 2
-     IF nColumnNo # 2 // File Size
-        IF lAscend
-           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] < y[ nColumnNo ] } )
-        ELSE
-           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] > y[ nColumnNo ] } )
-        ENDIF
-     ENDIF nColumnNo # 2
-  ENDIF
-
-     aImages[ nColumnNo ] := IF( lAscend, 1, 2 )
-
-
-
-/*
-  IF nOrder < 1
-     ASORT( aDirectory[nGridFocus], , , { | x, y | x[ 6 ] < y[ 6 ] } )
-  ELSE
-     lAscend := nOrder < 2
-     IF nColumnNo # 3
-        IF lAscend
-           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) < UPPER( y[ nColumnNo ] ) } )
-        ELSE
-           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) > UPPER( y[ nColumnNo ] ) } )
-        ENDIF
-     ELSE // File Size
-        IF lAscend
-           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] < y[ nColumnNo ] } )
-        ELSE
-           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] > y[ nColumnNo ] } )
-        ENDIF
-     ENDIF nColumnNo # 3
-
-     aImages[ nColumnNo ] := IF( lAscend, 1, 2 )
-
-  ENDIF nOrder < 1
- */
-
-
-
-
-
-  SplitChild_1.Grid_1.DeleteAllItems
-
-  SplitChild_1.Grid_1.DisableUpdate
-
-  /*
-  AEVAL( aDirectory[nGridFocus], { | a1 |  SplitChild_1.Grid_1.AddItem( { a1[ 1 ],;          // 1° File ( Only) Name
-                               IF( a1[ 2 ], '<DIR>', PADL( NTrim( a1[ 2 ]), 14 )),;          // 2° Size
-                                                                 DTOC(  a1[ 3 ] ),;          // 3° Date
-                                                                MsgInfo(a1[ 4 ])  } )} )       // 4° Time
-  */
-  Aeval(aDirectory[nGridFocus], {|e| SplitChild_2.Grid_2.AddItem( { e[1],if(valtype(e[2])="N", STR(e[2]), e[2]), DTOC(e[3]), e[4] } )})
-
-  SplitChild_1.Grid_1.EnableUpdate
-
-
-
-/*
-  AEVAL( aDirectory[nGridFocus], { | a1 |  SplitChild_1.Grid_1.AddItem( { a1[ 1 ],;          // 1° File ( Only) Name
-                                                                          a1[ 2 ],;          // 2° File Extention
-                               IF( a1[ 5 ], '<DIR>', PADL( NTrim( a1[ 3 ]), 14 )),;          // 3° Size / <DIR>
-                                                             IF( EMPTY( a1[ 4 ] ),;
-                                                   ' ',DTOC( STOD( LEFT( a1[ 4 ], ;
-                                             8 ) ) ) + SUBS( a1[ 4 ], 9 ) ) } ) } )          // 4° Date + Time
-*/
-
-RETURN
-
-
-/*
 *------------------------------------------------------------*
 procedure Head_click( nCol )
 *------------------------------------------------------------*
@@ -828,8 +723,6 @@ procedure Head_click( nCol )
     ENDIF
 
 Return
-
-*/
 
 *------------------------------------------------------------*
 Function ShowProperties()
@@ -1391,6 +1284,27 @@ Procedure ActualizaGrids()
 
 Return
 
+Function CopiaDir( cOrigin, cDestiny )
+
+    If !Empty(cOrigin) .AND. !Empty(cDestiny)
+
+        DosComm := "/c xcopy "+cOrigin+" "+cDestiny+" /s /c /y /e /h /i"
+
+        EXECUTE FILE "CMD.EXE" PARAMETERS DosComm HIDE
+
+    EndIf
+
+    For n:= 1 to 4
+
+        ReReadFolder()
+
+        DO EVENTS
+
+    Next
+
+Return(Nil)
+
+
 /*
 Function Main()
   cOrigen  :="C:\SISTEMAS\*"
@@ -1438,17 +1352,6 @@ return nil
 //   DosComm := "/c xcopy "+cOrigin+" "+cDestiny+" /s /c /y /e /h /i"
 
 
-Function CopiaDir( cOrigin, cDestiny )
-
-   If !Empty(cOrigin) .AND. !Empty(cDestiny)
-
-      DosComm := "/c xcopy "+cOrigin+" "+cDestiny+" /s /c /y /e /h /i"
-
-      EXECUTE FILE "CMD.EXE" PARAMETERS DosComm HIDE
-
-    EndIf
-
-Return(Nil)
 
 *------------------------------------------------------------*
 FUNCTION NewFolder()
@@ -1517,6 +1420,141 @@ FUNCTION DeleteFile()
     ENDIF
 
 RETURN NIL
+
+
+Procedure RemoverDir()
+   LOCAL cDir
+   IF DirRemove( cDir := hb_DirSepToOS( "./mydir" ) ) == 0
+      ? "Removing directory", cDir, "was successful"
+   ENDIF
+Return
+
+//This example uses DirRemove() to delete a subdirectory named
+//   C:\TEST\ONE, which only contains an empty subdirectory named
+//   C:\TEST\ONE\TWO:
+Procedure RemoveDir2()
+   DirRemove("c:\test\one\two")        // First delete lowest dir
+   nResult := DirRemove("c:\test\one")  // Then delete higher dir
+   IF nResult != 0
+      ? "Cannot remove directory, DOS error ", siResult
+      BREAK
+   ENDIF
+Return
+
+Procedure CrearDir()
+   LOCAL cDir
+   IF MakeDir( cDir := hb_DirSepToOS( "./mydir" ) ) == 0
+      ? "Directory", cDir, "successfully created"
+   ENDIF
+Return
+
+
+//This example assumes that C:\TEST exists and uses DirMake()
+//twice to create a nested subdirectory under it:
+Procedure CrearDir2()
+   DirMake("c:\test\one")    // Create top-most one
+   nResult := DirMake("c:\test\one\two")
+   IF nResult != 0
+      ? "Cannot make directory, DOS error ", nResult
+      BREAK
+   ENDIF
+Return
+//  You may also use something like this:
+
+//   DirMake( ".\test" )
+
+
+Procedure CambiarDir()
+   IF DirChange( hb_DirSepToOS( "./mydir" ) ) == 0
+      ? "Change to directory was successful"
+   ENDIF
+Return
+
+
+//This example builds a string that contains all currently
+//available drives on your system:
+
+FUNCTION AllDrives()
+   LOCAL wI, cDrives := ""
+
+   FOR wI := 1 TO 26
+       IF DiskChange( Chr(wI + 64) )
+          cDrives := cDrives + Chr(wI + 64)
+       ENDIF
+   NEXT
+RETURN cDrives
+
+//This example uses DiskChange() to change to drive "D":
+
+Procedure CambiaUnidad()
+   IF DiskChange("D:")
+      ? "Successfully changed"
+   ELSE
+      ? "Not changed"
+   ENDIF
+Return
+
+
+//This example illustrates the relationship between
+//DiskName()and DiskChange() and shows that DiskName() is unaffected by
+//the SET DEFAULT TO command:
+/*
+   ? DiskName()      // C
+   SET DEFAULT TO A
+   ? DiskName()      // C
+   DiskChange("A")
+   ? DiskName()      // A
+   DiskChange("C")
+   ? DiskName()      // C
+*/
+
+
+//The following example attempts to change to the "c:\dos"
+//directory.  If it is unsuccessful, an error message is displayed.
+
+Procedure cambiocarpeta()
+   nResult :=  DirChange("c:\dos")
+
+   IF nResult != 0
+      ? "Cannot change directory. "
+      DO CASE
+         CASE nResult == 3
+            ?? "Directory does not exist."
+         CASE nResult == 5
+            ?? "Access to directory denied."
+      END
+      BREAK
+   ENDIF
+Return
+
+//You may also use something like this:
+
+//DirChange( "..\..\test" )
+
+
+//This example deletes a set of files matching a wildcard
+//pattern:
+
+//   #include "Directry.ch"
+//   AEval(Directory("*.BAK"), { |aFile| ;
+//      FErase(aFile[F_NAME]) })
+
+//This example erases a file and displays a message if the
+//operation fails:
+
+//   IF FErase("AFile.txt") == -1
+//      ? "File erase error:", FError()
+//      BREAK
+//   ENDIF
+
+
+//This example demonstrates a file rename:
+
+//   IF FRename("OldFile.txt", "NewFile.txt") == -1
+//      ? "File error:", FError()
+//   ENDIF
+
+
 
 *------------------------------------------------------------*
 FUNCTION GetDirectory( cVar, nFocus )
@@ -1771,7 +1809,7 @@ FUNCTION TextEdit( cFile, cExt, lReadOnly )
                     MAXLENGTH 65535
             ENDIF
 
-            ON KEY ESCAPE              ACTION wTextEdit.Release
+            ON KEY ESCAPE ACTION wTextEdit.Release
 
         END WINDOW
 
@@ -2376,6 +2414,110 @@ FUNCTION ComprimeFile( lPack )
 RETURN NIL
 
 
+/*
+
+*-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._
+PROCEDURE Head_click( nColumnNo )
+*-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._
+
+  LOCAL nOrder  := aColOrder[ nColumnNo ],; // 0: Natural, 1: Ascend, 2: Descend
+        aImages := ARRAY(4),;
+        lAscend
+
+  nOrder := IF( nOrder < 2, nOrder + 1, 0 )
+
+  aColOrder[ nColumnNo ] := nOrder
+
+  AEVAL( aImages, { | x, i1 | aImages[ i1 ] := 0 } )
+
+
+
+  IF nOrder = 0
+     ASORT( aDirectory[nGridFocus], , , { | x, y | x[ 6 ] < y[ 6 ] } )
+  ENDIF
+
+  IF nOrder = 1
+     lAscend := nOrder < 2
+     IF nColumnNo # 1
+        IF lAscend
+           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) < UPPER( y[ nColumnNo ] ) } )
+        ELSE
+           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) > UPPER( y[ nColumnNo ] ) } )
+        ENDIF
+     ENDIF
+  ENDIF
+
+ // Asort(aDirectory[nGridFocus], , , {|a,b| if(valtype(a[2]) # "N" .AND. valtype(b[2]) # "N", SUBSTR(a[1],2) < SUBSTR(b[1],2), if(valtype(a[2]) # "N", SUBSTR(a[1],2) < CHR(254)+b[1], if(valtype(b[2]) # "N", CHR(254)+a[1] < SUBSTR(b[1],2), a[1] < b[1])))})
+
+
+
+  IF nOrder = 2
+     IF nColumnNo # 2 // File Size
+        IF lAscend
+           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] < y[ nColumnNo ] } )
+        ELSE
+           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] > y[ nColumnNo ] } )
+        ENDIF
+     ENDIF nColumnNo # 2
+  ENDIF
+
+     aImages[ nColumnNo ] := IF( lAscend, 1, 2 )
+
+
+
+//  IF nOrder < 1
+//     ASORT( aDirectory[nGridFocus], , , { | x, y | x[ 6 ] < y[ 6 ] } )
+//  ELSE
+//     lAscend := nOrder < 2
+//     IF nColumnNo # 3
+//        IF lAscend
+//           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) < UPPER( y[ nColumnNo ] ) } )
+//        ELSE
+//           ASORT( aDirectory[nGridFocus], , , { | x, y | UPPER( x[ nColumnNo ] ) > UPPER( y[ nColumnNo ] ) } )
+//        ENDIF
+//     ELSE // File Size
+//        IF lAscend
+//           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] < y[ nColumnNo ] } )
+//        ELSE
+//           ASORT( aDirectory[nGridFocus], , , { | x, y | x[ nColumnNo ] > y[ nColumnNo ] } )
+//        ENDIF
+//     ENDIF nColumnNo # 3
+//
+//     aImages[ nColumnNo ] := IF( lAscend, 1, 2 )
+//
+//  ENDIF nOrder < 1
+
+
+
+
+
+  SplitChild_1.Grid_1.DeleteAllItems
+
+  SplitChild_1.Grid_1.DisableUpdate
+
+//  AEVAL( aDirectory[nGridFocus], { | a1 |  SplitChild_1.Grid_1.AddItem( { a1[ 1 ],;          // 1° File ( Only) Name
+//                               IF( a1[ 2 ], '<DIR>', PADL( NTrim( a1[ 2 ]), 14 )),;          // 2° Size
+//                                                                 DTOC(  a1[ 3 ] ),;          // 3° Date
+//                                                                MsgInfo(a1[ 4 ])  } )} )       // 4° Time
+
+  Aeval(aDirectory[nGridFocus], {|e| SplitChild_2.Grid_2.AddItem( { e[1],if(valtype(e[2])="N", STR(e[2]), e[2]), DTOC(e[3]), e[4] } )})
+
+  SplitChild_1.Grid_1.EnableUpdate
+
+
+
+//
+//  AEVAL( aDirectory[nGridFocus], { | a1 |  SplitChild_1.Grid_1.AddItem( { a1[ 1 ],;          // 1° File ( Only) Name
+//                                                                          a1[ 2 ],;          // 2° File Extention
+//                               IF( a1[ 5 ], '<DIR>', PADL( NTrim( a1[ 3 ]), 14 )),;          // 3° Size / <DIR>
+//                                                             IF( EMPTY( a1[ 4 ] ),;
+//                                                   ' ',DTOC( STOD( LEFT( a1[ 4 ], ;
+//                                             8 ) ) ) + SUBS( a1[ 4 ], 9 ) ) } ) } )          // 4° Date + Time
+//
+
+RETURN
+
+*/
 
 
 
